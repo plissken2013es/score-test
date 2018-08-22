@@ -1,29 +1,240 @@
 "use strict";
 
-var highScores = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]];
-var ghost = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]];
+/**
+ * User sessions
+ * @param {Array} users
+ */
+const users = [];
 
-module.exports = function (socket) {
-	socket.on('score list', function (level, fn) {
-		fn({h:highScores[level], g:ghost[level]});
-	});
-
-
-	socket.on("new score", function (_score,_ghost,fn) {
-		highScores[_score.l].push({ n: _score.n, s: Number(_score.s) });
-		highScores[_score.l] = highScores[_score.l].sort(function (a, b) {
-			if (a.s > b.s) {
-				return 1;
-			}
-			if (a.s < b.s) {
-				return -1;
-			}
-			return 0;
-		});
-		highScores[_score.l].splice(5, highScores[_score.l].length);  
-		if(highScores[_score.l][0].n == _score.n && highScores[_score.l][0].s == _score.s){
-			ghost[_score.l] = _ghost;
+/**
+ * Find opponent for a user
+ * @param {User} user
+ */
+function findOpponent(user) {
+	for (let i = 0; i < users.length; i++) {
+		if (
+			user !== users[i] &&
+			users[i].opponent === null
+		) {
+			new Game(user, users[i]).start();
 		}
-	});
+	}
+}
+
+/**
+ * Remove user session
+ * @param {User} user
+ */
+function removeUser(user) {
+	users.splice(users.indexOf(user), 1);
+}
+
+/**
+ * Game class
+ */
+class Game {
+
+	/**
+	 * @param {User} user1 
+	 * @param {User} user2 
+	 */
+	constructor(user1, user2) {
+		this.user1 = user1;
+		this.user2 = user2;
+	}
+
+	/**
+	 * Start new game
+	 */
+	start() {
+		this.user1.start(this, this.user2);
+		this.user2.start(this, this.user1);
+	}
+
+	/**
+	 * Is game ended
+	 * @return {boolean}
+	 */
+	ended() {
+		return this.user1.guess !== GUESS_NO && this.user2.guess !== GUESS_NO;
+	}
+
+	/**
+	 * Final score
+	 */
+	score() {
+		if (
+			this.user1.guess === GUESS_ROCK && this.user2.guess === GUESS_SCISSORS ||
+			this.user1.guess === GUESS_PAPER && this.user2.guess === GUESS_ROCK ||
+			this.user1.guess === GUESS_SCISSORS && this.user2.guess === GUESS_PAPER
+		) {
+			this.user1.win();
+			this.user2.lose();
+		} else if (
+			this.user2.guess === GUESS_ROCK && this.user1.guess === GUESS_SCISSORS ||
+			this.user2.guess === GUESS_PAPER && this.user1.guess === GUESS_ROCK ||
+			this.user2.guess === GUESS_SCISSORS && this.user1.guess === GUESS_PAPER
+		) {
+			this.user2.win();
+			this.user1.lose();
+		} else {
+			this.user1.draw();
+			this.user2.draw();
+		}
+	}
+
+}
+
+/**
+ * User session class
+ */
+class User {
+
+	/**
+	 * @param {Socket} socket
+	 */
+	constructor(socket) {
+		this.socket = socket;
+		this.game = null;
+		this.opponent = null;
+		this.guess = GUESS_NO;
+	}
+
+	/**
+	 * Set guess value
+	 * @param {number} guess
+	 */
+	setGuess(guess) {
+		if (
+			!this.opponent ||
+			guess <= GUESS_NO ||
+			guess > GUESS_SCISSORS
+		) {
+			return false;
+		}
+		this.guess = guess;
+		return true;
+	}
+
+	/**
+	 * Start new game
+	 * @param {Game} game
+	 * @param {User} opponent
+	 */
+	start(game, opponent) {
+		this.game = game;
+		this.opponent = opponent;
+		this.guess = GUESS_NO;
+		this.socket.emit("start");
+	}
+
+	/**
+	 * Terminate game
+	 */
+	end() {
+		this.game = null;
+		this.opponent = null;
+		this.guess = GUESS_NO;
+		this.socket.emit("end");
+	}
+
+	/**
+	 * Trigger win event
+	 */
+	win() {
+		this.socket.emit("win", this.opponent.guess);
+	}
+
+	/**
+	 * Trigger lose event
+	 */
+	lose() {
+		this.socket.emit("lose", this.opponent.guess);
+	}
+
+	/**
+	 * Trigger draw event
+	 */
+	draw() {
+		this.socket.emit("draw", this.opponent.guess);
+	}
+
+}
+
+/**
+ * Socket.IO on connect event
+ * @param {Socket} socket
+ */
+module.exports = {
+
+	io: (socket) => {
+		const user = new User(socket);
+		users.push(user);
+		findOpponent(user);
+
+		socket.on("disconnect", () => {
+			console.log("Disconnected: " + socket.id);
+			removeUser(user);
+			if (user.opponent) {
+				user.opponent.end();
+				findOpponent(user.opponent);
+			}
+		});
+
+		socket.on("guess", (guess) => {
+			console.log("Guess: " + guess + " " + socket.id);
+            
+            if (guess == 4) {
+                storage.get("test").then(value => {
+                    console.log("storage size", storage.size());
+                    console.log("storage test", value);
+                    
+                    storage.length().then((numKeys)=>{
+                        console.log("storage numKeys", numKeys);
+                        storage.set("test"+numKeys, {
+                            hola: "caracola",
+                            arr: [1, 2, 3, 4, 5]
+                        }).then(value => {
+                            console.log("set key?", value);
+                        });
+                        
+                        for (var q=0; q<numKeys; q++) {
+                            (function(q) {
+                                storage.key(q).then(value => {
+                                    console.log("get key for ", q, "=", value);
+                                    storage.get(value).then(value => {
+                                        console.log("get value?", value);
+                                    });
+                                });
+                            })(q);
+                        }
+                    });
+                    
+                });
+            }
+            
+            if (guess == 5) {
+                storage.clear().then(()=>{
+                    console.log("storage cleared", storage.size());
+                });
+            }
+            
+			if (user.setGuess(guess) && user.game.ended()) {
+				user.game.score();
+				user.game.start();
+				storage.get('games', 0).then(games => {
+					storage.set('games', games + 1);
+				});
+			}
+		});
+
+		console.log("Connected: " + socket.id);
+	},
+
+	stat: (req, res) => {
+		storage.get('games', 0).then(games => {
+			res.send(`<h1>Games played: ${games}</h1>`);
+		});
+	}
 
 };

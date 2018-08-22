@@ -1,74 +1,29 @@
-﻿<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Save the Semicolon</title>    
-    <meta name="viewport" content="width=device-width, initial-scale=.6">
-	<meta name="apple-mobile-web-app-capable" content="yes">
-	<meta name="mobile-web-app-capable" content="yes">
-    <!-- build:css -->
-    <link href="style/main.css" rel="stylesheet" />
-    <!-- endbuild -->
-    <script src="https://www.gstatic.com/firebasejs/3.4.1/firebase.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
-
+<title>Rock, Paper, Scissors</title>
+<meta charset="UTF-8">
 </head>
-
 <body>
-    <script>var $ = {};
-    </script>
-  <div  id="cont">
-    <input id="username" placeholder="Enter a user name" type="text" name="username" onfocus="$.canEdit=true;" onblur="$.gameProgress.saveUser(this.value);$.canEdit=false;" onkeydown="if (event.keyCode == 13)
-                        {this.blur();}">
-    <div id="game">
-        <div id='blockContainer'></div>
-        <div id="bob">
-            <div class="head">
-                <div id="eyeLeft" class='eye'></div>
-                <div id="eyeRight" class='eye'></div>
-                <div id='browLeft' class='brow'></div>
-                <div id='browRight' class='brow'></div>
-            </div>
-            <div id="bobody">
-            <div class="body">
-                <div class="comma"></div>
-            </div>
-            </div>
-       
 
-        </div>
-
-        <div id="ghost">
-            <div class="head">
-                <div id="eyeLeft" class='eye'></div>
-                <div id="eyeRight" class='eye'></div>
-                <div id='browLeft' class='brow'></div>
-                <div id='browRight' class='brow'></div>
-            </div>
-            <div class="body">
-                <div class="comma"></div>
-            </div>
-        </div>
-        <canvas id="main"></canvas>
-        <div id="my-gui-container" class="right bigText"></div>
+<div style="text-align:center">
+    <h1 id="message"></h1>
+    <div>
+        <button>Rock</button>
+        <button>Paper</button>
+        <button>Scissors</button>
+        <button>Load</button>
+        <button>Save</button>
     </div>
-    <div id="overlay"></div>
-    <div id="effect"></div>
-    </div>
-    <!-- build:js -->
-    <script src="js/utils/sonantx.js"></script>
-    <script src="js/utils/SFX.js"></script>
-    <script src="js/utils/util.js"></script>
-    <script src="js/utils/tween.js"></script>
+    <div id="score"></div>
+    <p>
+        <a href="/stat">Statistics</a>
+    </p>
+</div>
 
-    <script src="js/ents/player.js"></script>
-    <script src="js/ents/ghost.js"></script>
-    <script src="js/ents/block.js"></script>
-    <script src="js/states/play.js"></script>
-    <script src="js/states/select.js"></script>
-    <script src="js/game.js"></script>
-        <script src="js/utils/levelDefs.js"></script>
-    <!-- endbuild -->
+<script src="/socket.io/socket.io.js"></script>
+<script src="/shared.js"></script>
+<script src="/client.js"></script>
+
 </body>
-
 </html>
