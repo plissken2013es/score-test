@@ -1,204 +1,1 @@
-"use strict";
-
-/**
- * User sessions
- * @param {Array} users
- */
-const users = [];
-
-/**
- * Find opponent for a user
- * @param {User} user
- */
-function findOpponent(user) {
-	for (let i = 0; i < users.length; i++) {
-		if (
-			user !== users[i] &&
-			users[i].opponent === null
-		) {
-			new Game(user, users[i]).start();
-		}
-	}
-}
-
-/**
- * Remove user session
- * @param {User} user
- */
-function removeUser(user) {
-	users.splice(users.indexOf(user), 1);
-}
-
-/**
- * Game class
- */
-class Game {
-
-	/**
-	 * @param {User} user1 
-	 * @param {User} user2 
-	 */
-	constructor(user1, user2) {
-		this.user1 = user1;
-		this.user2 = user2;
-	}
-
-	/**
-	 * Start new game
-	 */
-	start() {
-		this.user1.start(this, this.user2);
-		this.user2.start(this, this.user1);
-	}
-
-	/**
-	 * Is game ended
-	 * @return {boolean}
-	 */
-	ended() {
-		return this.user1.guess !== GUESS_NO && this.user2.guess !== GUESS_NO;
-	}
-
-	/**
-	 * Final score
-	 */
-	score() {
-		if (
-			this.user1.guess === GUESS_ROCK && this.user2.guess === GUESS_SCISSORS ||
-			this.user1.guess === GUESS_PAPER && this.user2.guess === GUESS_ROCK ||
-			this.user1.guess === GUESS_SCISSORS && this.user2.guess === GUESS_PAPER
-		) {
-			this.user1.win();
-			this.user2.lose();
-		} else if (
-			this.user2.guess === GUESS_ROCK && this.user1.guess === GUESS_SCISSORS ||
-			this.user2.guess === GUESS_PAPER && this.user1.guess === GUESS_ROCK ||
-			this.user2.guess === GUESS_SCISSORS && this.user1.guess === GUESS_PAPER
-		) {
-			this.user2.win();
-			this.user1.lose();
-		} else {
-			this.user1.draw();
-			this.user2.draw();
-		}
-	}
-
-}
-
-/**
- * User session class
- */
-class User {
-
-	/**
-	 * @param {Socket} socket
-	 */
-	constructor(socket) {
-		this.socket = socket;
-		this.game = null;
-		this.opponent = null;
-		this.guess = GUESS_NO;
-	}
-
-	/**
-	 * Set guess value
-	 * @param {number} guess
-	 */
-	setGuess(guess) {
-		if (
-			!this.opponent ||
-			guess <= GUESS_NO ||
-			guess > GUESS_SCISSORS
-		) {
-			return false;
-		}
-		this.guess = guess;
-		return true;
-	}
-
-	/**
-	 * Start new game
-	 * @param {Game} game
-	 * @param {User} opponent
-	 */
-	start(game, opponent) {
-		this.game = game;
-		this.opponent = opponent;
-		this.guess = GUESS_NO;
-		this.socket.emit("start");
-	}
-
-	/**
-	 * Terminate game
-	 */
-	end() {
-		this.game = null;
-		this.opponent = null;
-		this.guess = GUESS_NO;
-		this.socket.emit("end");
-	}
-
-	/**
-	 * Trigger win event
-	 */
-	win() {
-		this.socket.emit("win", this.opponent.guess);
-	}
-
-	/**
-	 * Trigger lose event
-	 */
-	lose() {
-		this.socket.emit("lose", this.opponent.guess);
-	}
-
-	/**
-	 * Trigger draw event
-	 */
-	draw() {
-		this.socket.emit("draw", this.opponent.guess);
-	}
-
-}
-
-/**
- * Socket.IO on connect event
- * @param {Socket} socket
- */
-module.exports = {
-
-	io: (socket) => {
-		const user = new User(socket);
-		users.push(user);
-		findOpponent(user);
-
-		socket.on("disconnect", () => {
-			console.log("Disconnected: " + socket.id);
-			removeUser(user);
-			if (user.opponent) {
-				user.opponent.end();
-				findOpponent(user.opponent);
-			}
-		});
-
-		socket.on("guess", (guess) => {
-			console.log("Guess: " + socket.id);
-			if (user.setGuess(guess) && user.game.ended()) {
-				user.game.score();
-				user.game.start();
-				storage.get('games', 0).then(games => {
-					storage.set('games', games + 1);
-				});
-			}
-		});
-
-		console.log("Connected: " + socket.id);
-	},
-
-	stat: (req, res) => {
-		storage.get('games', 0).then(games => {
-			res.send(`<h1>Games played: ${games}</h1>`);
-		});
-	}
-
-};
+for(_='rol~on|",qc|t~sq`.~e="s_socket^userZZsYthisXX.WstartV.V(X,WZRenQY.lQgthNUserLremoveLKreturn JY[b]HnullF=0;bEfuncti|DD(B(bA=[@.^.emit("99rotqh,f8launch%%Chargeq$)}#%Torpedoqrand(]=-25,250,),255var for(Math.floor(random()lG=5*)+59glitchqccheckG.push(.opp|Qtb9}D a,amea.g.	syncr|izeSunkqgQerateGlitch(){Wg=F,X=F}.prototype.findOpp|Qt(a#a.|("D bE<N;b++)a!==H&&F===H&&new G(H).V()KY.splice(Y.indexOf(a1)G(ba_ubqb_hipqWZ1=WZ2=b,W,Wcnt=0a@],b=30,60cE>c;c++d@256216)],e@10,3015,40)],f@.5*+.5];a[d,e,f]#JabJ*A-a+1))+aif(	cnt++>	lG	cnt=0,	;b=2,7c@],dE>d;d++e=f=75,500);c[e,f]#if(aa1)g=PI,h@];h[0]=1)?g/2:1)?-g/2:g,h[1h[2);f=1500,3500);a8a8#}LW^=Y@];GV=BWZ1R2WZ2R1#,LV=BbWg=X=b;c={p1:Wn,p2:X.n,~e:W~e};X9Vqc#,LQd=BX9Qd",module.exports=Db=new L(a);a.|("disc|nectqBKAb&&A.Qd(A)`Bc`cDa$D$aA%SubqD%SubqasilQtqBsilQt"BccAnqDb.n=YbA#b9welcomeqN+1#;';G=/[^ -"&-7:-?CGIMOPS-U[\]a-pr-{}]/.exec(_);)with(_.split(G))_=join(shift());eval(_)
