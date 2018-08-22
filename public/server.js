@@ -1,1 +1,29 @@
-var highScores=[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]],ghost=[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]];module.exports=function(b){b.on("score list",function(a,c){c({h:highScores[a],g:ghost[a]})});b.on("new score",function(a,c,b){highScores[a.l].push({n:a.n,s:Number(a.s)});highScores[a.l]=highScores[a.l].sort(function(a,b){return a.s>b.s?1:a.s<b.s?-1:0});highScores[a.l].splice(5,highScores[a.l].length);highScores[a.l][0].n==a.n&&highScores[a.l][0].s==a.s&&(ghost[a.l]=c)})};
+"use strict";
+
+var highScores = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]];
+var ghost = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]];
+
+module.exports = function (socket) {
+	socket.on('score list', function (level, fn) {
+		fn({h:highScores[level], g:ghost[level]});
+	});
+
+
+	socket.on("new score", function (_score,_ghost,fn) {
+		highScores[_score.l].push({ n: _score.n, s: Number(_score.s) });
+		highScores[_score.l] = highScores[_score.l].sort(function (a, b) {
+			if (a.s > b.s) {
+				return 1;
+			}
+			if (a.s < b.s) {
+				return -1;
+			}
+			return 0;
+		});
+		highScores[_score.l].splice(5, highScores[_score.l].length);  
+		if(highScores[_score.l][0].n == _score.n && highScores[_score.l][0].s == _score.s){
+			ghost[_score.l] = _ghost;
+		}
+	});
+
+};
